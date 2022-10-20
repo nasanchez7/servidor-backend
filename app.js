@@ -53,7 +53,7 @@ class Contenedor{
             const archivo = await fs.promises.readFile(this.archivo, 'utf-8')
             const json = JSON.parse(archivo);
             if (json.length > 0) {
-                return console.log(json)
+                return json
             }
             console.log("Archivo vacio")
         } catch (error) {
@@ -91,41 +91,39 @@ class Contenedor{
 
 const archivo = new Contenedor("productos");
 
-archivo.save({
-    title: "Remera Adidas",
-    price: 5200,
-    thumbnail: "/remeraadidas1.png"
+
+const express = require('express');
+
+const app = express()
+
+const PORT = 8080
+
+app.get('/', (request, response) => {
+    response.send("Servidor - Nadir Blanco Sanchez")
 })
 
-setTimeout(()=>{
-    archivo.save({
-        title: "Remera Nike",
-        price: 6000,
-        thumbnail: "/remeranike1.png"
+app.get('/productos', (req, res) => {
+    archivo.getAll().then(response => {
+        res.send(response)
     })
-}, 2000)
+})
 
-setTimeout(()=>{
-    archivo.save({
-        title: "Remera Puma",
-        price: 3200,
-        thumbnail: "/remerapuma1.png"
-    })
-}, 3000)
-
-setTimeout(()=>{
-    archivo.deleteById(3)
-}, 4000)
-
-setTimeout(()=>{
+app.get('/productoRandom', (req, res) => {
     archivo.getAll()
-}, 5000)
+    .then(response => {
+        const numero = Math.random() * response.length 
+        const numeroArray = Math.round(numero)
+        res.send(response[numeroArray])
+    })
+})
 
-setTimeout(()=>{
-    archivo.getById(1)
-}, 6000)
+const server = app.listen(PORT, ()=>{
+    console.log(`Servidor abierto en el puerto ${server.address().port}`)
+})
+server.on("error", error => console.log(error)) 
 
-setTimeout(()=>{
-    archivo.deleteAll()
-}, 7000)
+
+
+
+
 

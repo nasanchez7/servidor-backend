@@ -1,0 +1,1 @@
+[{"id":1,"title":"Remera Adidas","price":5200,"thumbnail":"/remeraadidas1.png"},{"id":2,"title":"Remera Nike","price":6000,"thumbnail":"/remeranike1.png"},{"id":3,"title":"Remera Puma","price":3200,"thumbnail":"/remerapuma1.png"},{"id":4,"title":"Remera Air Max Nike","price":6500,"thumbnail":"/remeraairmaxnike1.png"}]
