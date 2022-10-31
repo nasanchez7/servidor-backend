@@ -15,7 +15,7 @@ class Contenedor{
                         ...objeto
                     }
                 ]));
-                console.log(`Has agregado ${objeto.title} con el id ${this.id}`)
+                return `Has agregado ${objeto.title} con el id ${this.id}`
             }else{
                 const archivo = await fs.promises.readFile(this.archivo, 'utf-8')
                 const json = JSON.parse(archivo);
@@ -25,7 +25,7 @@ class Contenedor{
                         ...objeto
                     })
                     await fs.promises.writeFile(this.archivo, JSON.stringify(json))
-                    console.log(`Has agregado ${objeto.title} con el id ${json.length}`)
+                    return { msj: `Has agregado ${objeto.title} con el id ${json.length}`}
                 }
             }
         }
@@ -40,9 +40,12 @@ class Contenedor{
             const json = JSON.parse(archivo);
             if (json.length > 0) {
                 const obj = json.find(obj => obj.id === id)
-                if (obj) return console.log(obj) 
+                if (obj){
+                    return obj
+                }else{
+                    return {error: "producto no encontrado"}
+                } 
             }
-            console.log("Objeto no existente")
         } catch (error) {
             console.log(error)
         }
@@ -93,34 +96,68 @@ const archivo = new Contenedor("productos");
 
 
 const express = require('express');
+const { Router } = express;
 
 const app = express()
+const router = Router();
+
+app.use(express.json())
+app.use(express.urlencoded({extended: true}))
+app.use('/api/productos', router)
+app.use(express.static(__dirname + '/public'))
 
 const PORT = 8080
 
-app.get('/', (request, response) => {
-    response.send("Servidor - Nadir Blanco Sanchez")
-})
 
-app.get('/productos', (req, res) => {
+router.get('/', (req, res) => {
     archivo.getAll().then(response => {
         res.send(response)
     })
 })
 
-app.get('/productoRandom', (req, res) => {
-    archivo.getAll()
-    .then(response => {
-        const numero = Math.random() * response.length 
-        const numeroArray = Math.round(numero)
-        res.send(response[numeroArray])
+router.post('/', (req, res) => {
+    const producto = req.body;
+    archivo.save(producto)
+    res.send({msj: `Agregaste el producto ${producto.title}`})
+})
+
+router.delete('/:id', (req, res) => {
+    const id = parseInt(req.params.id)
+    archivo.deleteById(id)
+    res.send({msj: `Eliminaste el producto con el id ${id}`})
+})
+
+router.get('/:id', (req, res) => {
+    const id = parseInt(req.params.id)
+    archivo.getById(id).then(response => {
+        res.send(response)
     })
 })
+
+router.put('/:id', async (req, res) => {
+    const id = parseInt(req.params.id)
+    const producto = await archivo.getById(id)
+    const productoNuevo = {
+        id: id,
+        title: req.body.title,
+        price: req.body.price,
+        thumbnail: req.body.thumbnail
+    };
+
+    await archivo.deleteById(id)
+    await archivo.save(productoNuevo)
+    
+    res.send({msj: `Actualizaste el producto ${producto.title}`})
+}) 
+
+
 
 const server = app.listen(PORT, ()=>{
     console.log(`Servidor abierto en el puerto ${server.address().port}`)
 })
 server.on("error", error => console.log(error)) 
+
+
 
 
 
