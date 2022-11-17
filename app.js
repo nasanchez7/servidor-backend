@@ -1,156 +1,98 @@
-const fs = require('fs');
-
-class Contenedor{
-    constructor(archivo, id ){
-        this.archivo = `./${archivo}.txt`
-        this.id = 1
-    }
-
-    async save(objeto){
-        try{
-            if(!fs.existsSync(this.archivo)) {
-                await fs.promises.writeFile(this.archivo, JSON.stringify([
-                    {
-                        id: this.id,
-                        ...objeto
-                    }
-                ]));
-                return `Has agregado ${objeto.title} con el id ${this.id}`
-            }else{
-                const archivo = await fs.promises.readFile(this.archivo, 'utf-8')
-                const json = JSON.parse(archivo);
-                if(json.length > 0){
-                    json.push({
-                        id: json.length + 1,
-                        ...objeto
-                    })
-                    await fs.promises.writeFile(this.archivo, JSON.stringify(json))
-                    return { msj: `Has agregado ${objeto.title} con el id ${json.length}`}
-                }
-            }
-        }
-        catch(e){
-            console.log(`Ha habido un error al leer el archivo ${this.archivo}`)
-        }
-    }
-
-    async getById(id){
-        try {
-            const archivo = await fs.promises.readFile(this.archivo, 'utf-8')
-            const json = JSON.parse(archivo);
-            if (json.length > 0) {
-                const obj = json.find(obj => obj.id === id)
-                if (obj){
-                    return obj
-                }else{
-                    return {error: "producto no encontrado"}
-                } 
-            }
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
-    async getAll(){
-        try {
-            const archivo = await fs.promises.readFile(this.archivo, 'utf-8')
-            const json = JSON.parse(archivo);
-            if (json.length > 0) {
-                return json
-            }
-            console.log("Archivo vacio")
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
-    async deleteById(id){
-        try {
-            const archivo = await fs.promises.readFile(this.archivo, 'utf-8')
-            const json = JSON.parse(archivo);
-            if (json.length > 0) {
-                const index = json.findIndex(obj => obj.id === id)
-                if (index === -1) {
-                    console.log(`El objeto no existe`)
-                } else {
-                    json.splice(index, 1)
-                    await fs.promises.writeFile(this.archivo, JSON.stringify(json))
-                }
-            }
-        }catch(error){
-            console.log(error)
-        } 
-    } 
-
-    async deleteAll(){
-        try {
-            await fs.promises.writeFile(this.archivo, "[]")
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
-}
-
-const archivo = new Contenedor("productos");
-
-
+//Modulos y clases
+const Carrito = require('./Clases/Carrito')
+const Contenedor = require('./Clases/Contenedor')
 const express = require('express');
 const { Router } = express;
-
 const app = express()
-const router = Router();
+
+//Definicion de clases
+const productos = new Contenedor("productos");
+const carrito = new Carrito("carritos");
+
+//Rutas definidas
+const productosRuta = Router();
+const carritoRuta = Router();
 
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
-app.use('/api/productos', router)
+app.use('/api/productos', productosRuta)
+app.use('/api/carrito', carritoRuta)
 app.use(express.static(__dirname + '/public'))
 
 const PORT = 8080
 
-
-router.get('/', (req, res) => {
-    archivo.getAll().then(response => {
+//Endpoints de productos
+productosRuta.get('/', (req, res) => {
+    productos.getAll().then(response => {
         res.send(response)
     })
 })
 
-router.post('/', (req, res) => {
+productosRuta.post('/', (req, res) => {
     const producto = req.body;
-    archivo.save(producto)
+    productos.save(producto)
     res.send({msj: `Agregaste el producto ${producto.title}`})
 })
 
-router.delete('/:id', (req, res) => {
+productosRuta.delete('/:id', (req, res) => {
     const id = parseInt(req.params.id)
-    archivo.deleteById(id)
+    productos.deleteById(id)
     res.send({msj: `Eliminaste el producto con el id ${id}`})
 })
 
-router.get('/:id', (req, res) => {
+productosRuta.get('/:id', (req, res) => {
     const id = parseInt(req.params.id)
-    archivo.getById(id).then(response => {
+    productos.getById(id).then(response => {
         res.send(response)
     })
 })
 
-router.put('/:id', async (req, res) => {
+productosRuta.put('/:id', async (req, res) => {
     const id = parseInt(req.params.id)
-    const producto = await archivo.getById(id)
+    const producto = await productos.getById(id)
     const productoNuevo = {
         id: id,
         title: req.body.title,
         price: req.body.price,
         thumbnail: req.body.thumbnail
     };
-
-    await archivo.deleteById(id)
-    await archivo.save(productoNuevo)
-    
+    await productos.deleteById(id)
+    await productos.save(productoNuevo)
     res.send({msj: `Actualizaste el producto ${producto.title}`})
 }) 
 
 
+//Endpoints de carrito
+carritoRuta.post('/', async (req, res) => {
+    res.send(await carrito.save())
+})
+
+carritoRuta.delete('/:id', async (req, res) => {
+    const id = parseInt(req.params.id)
+    res.send(await carrito.deleteById(id))
+})
+
+carritoRuta.get('/:id/productos', async (req, res) => {
+    const id = parseInt(req.params.id)
+    res.send(await carrito.getById(id))
+})
+
+carritoRuta.post('/:id/productos', async (req, res) => {
+    const id = parseInt(req.params.id)
+    const producto = req.body;
+    res.send(await carrito.saveProduct(id, producto))
+})
+
+carritoRuta.delete('/:id/productos/:idProd', async (req, res) => {
+    const idCarrito = parseInt(req.params.id)
+    const idProducto = parseInt(req.params.idProd)
+    res.send(await carrito.deleteProduct(idCarrito, idProducto))
+})
+
+//Manejo de errores
+app.use((req, res, next) => {
+    res.status(404).send({error: -2, descripcion: `Ruta no implementada`});
+});
 
 const server = app.listen(PORT, ()=>{
     console.log(`Servidor abierto en el puerto ${server.address().port}`)

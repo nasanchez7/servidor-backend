@@ -1,0 +1,1 @@
+[{"id":1,"timestamp":1668707944425,"productos":[{"id":1,"timestamp":2134124,"nombre":"zapatillas nike","descripcion":"air max nike","codigo":213124,"foto":"/airmax.png","precio":12323,"stock":6}]}]
