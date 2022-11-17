@@ -13,6 +13,9 @@ const carrito = new Carrito("carritos");
 const productosRuta = Router();
 const carritoRuta = Router();
 
+//Administrador
+const admin = true;
+
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 app.use('/api/productos', productosRuta)
@@ -91,7 +94,7 @@ carritoRuta.delete('/:id/productos/:idProd', async (req, res) => {
 
 //Manejo de errores
 app.use((req, res, next) => {
-    res.status(404).send({error: -2, descripcion: `Ruta no implementada`});
+    res.status(404).send({error: -2, descripcion: `Ruta ${req.url} metodo ${req.method} no implementada`});
 });
 
 const server = app.listen(PORT, ()=>{
