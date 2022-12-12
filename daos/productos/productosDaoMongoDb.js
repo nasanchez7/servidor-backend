@@ -11,9 +11,9 @@ const crud = async () => {
     await config.initMongoDB()
     //await productos.save({title: "Remera Adidas",price: 5000,thumbnail: "/remeraadidas1.png"})
     //await productos.getAll()
-    //await productos.getByName("Remera Adidas")
+    //await productos.getById("639787392d55a93df2e44996")
     //await productos.deleteAll()
-    //await productos.deleteByName("Remera Adidas")
+    //await productos.deleteById("63979d03f3b9d132c39460c5")
 }
 
 crud()
