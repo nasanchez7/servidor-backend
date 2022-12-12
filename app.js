@@ -1,13 +1,13 @@
 //Modulos y clases
-const Carrito = require('./Clases/Carrito')
-const Contenedor = require('./Clases/Contenedor')
+const Carrito = require('./daos/carritos/carritoDaoFs')
+const Contenedor = require('./daos/productos/productosDaoFs')
 const express = require('express');
 const { Router } = express;
 const app = express()
 
 //Definicion de clases
-const productos = new Contenedor("productos");
-const carrito = new Carrito("carritos");
+const productos = new Contenedor();
+const carrito = new Carrito();
 
 //Rutas definidas
 const productosRuta = Router();
