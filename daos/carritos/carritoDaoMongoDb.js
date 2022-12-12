@@ -18,9 +18,9 @@ const crud = async () => {
         stock:6
     }]})*/
     //await carritos.getAll()
-    //await carritos.getByName("Remera Adidas")
+    //await carritos.getById("63978a0b5f16cfcd9378ba7b")
     //await carritos.deleteAll()
-    //await carritos.deleteByName("Remera Adidas")
+    //await carritos.deleteById("63978a0b5f16cfcd9378ba7b")
 }
 
 crud()

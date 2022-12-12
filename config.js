@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const admin = require("firebase-admin");
+const serviceAccount = require("./ecommerce-backend-6d4da-firebase-adminsdk-l5bim-65aea6b18f.json");
 
 async function initMongoDB() {
     try {
@@ -14,6 +16,9 @@ async function initMongoDB() {
 }
 
 async function initFirebase(){
+    admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+    });
     console.log("servidor iniciado firebase")
 }
 

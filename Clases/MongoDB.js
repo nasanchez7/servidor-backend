@@ -15,10 +15,10 @@ class MongoDb {
         console.log(save)
     }
 
-    async getByName(name){
+    async getById(id){
         const collectionSchema = new mongoose.Schema(this.schema)
         const collections = mongoose.model(this.collection, collectionSchema)
-        const elemento = await collections.find().where({title: name});
+        const elemento = await collections.find().where({_id: id});
         console.log(elemento)
     }
 
@@ -29,10 +29,10 @@ class MongoDb {
         console.log(listaElementos)
     }
 
-    async deleteByName(name){
+    async deleteById(id){
         const collectionSchema = new mongoose.Schema(this.schema)
         const collections = mongoose.model(this.collection, collectionSchema)
-        const eliminarElemento = await collections.deleteOne({title: name})
+        const eliminarElemento = await collections.deleteOne({_id: id})
         console.log(eliminarElemento)
     } 
 
